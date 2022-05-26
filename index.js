@@ -134,6 +134,9 @@ app.get('/api/users/:_id/logs', function(req, res) {
         .exec(function(err, data)
         {
           if (err) return console.error(err);
+          data = data.map(d => {
+            return {description: d.description, duration: d.duration, date: d.date.toDateString()}
+          })
           res.json({
             username: username,
             count: data.length ? data.length : 0,
