@@ -6,6 +6,12 @@ let bodyParser = require('body-parser')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(cors())
+app.use(express.static('public'))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html')
+});
+
 //Config Mongoose
 const mongoose = require('mongoose');
 
@@ -57,7 +63,7 @@ app.route('/api/users')
 //Create Exercise
 app.post('/api/users/:_id/exercises',function(req, res) {
   //Check if user can be find, if not, return user not found
-  User.findById(req.body[":_id"], function (err, data) {
+  User.findById(req.params["_id"], function (err, data) {
     if (err) return console.log(err);
     if (data)
     {
@@ -65,7 +71,7 @@ app.post('/api/users/:_id/exercises',function(req, res) {
       let username = data.username;
       //Check if date string is exist, if yes, convert to date, if not, apply current date
       let newExercise = new Exercise({
-        userid: req.body[":_id"],
+        userid: req.params["_id"],
         description: req.body.description,
         duration: req.body.duration,
         date: (req.body.date) ? new Date(req.body.date) : new Date()
@@ -73,7 +79,7 @@ app.post('/api/users/:_id/exercises',function(req, res) {
 
       newExercise.save(function(err, data) {
         if (err) return console.log(err);
-        console.log(username);
+        console.log(data);
         res.json({
           username: username,
           description: data.description,
@@ -142,12 +148,6 @@ app.get('/api/users/:_id/logs', function(req, res) {
     }
   })
 })
-
-app.use(cors())
-app.use(express.static('public'))
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/views/index.html')
-});
 
 
 
