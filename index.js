@@ -16,7 +16,7 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   username: { type: String, required: true}
-})
+}, {versionKey:false})
 
 let User = mongoose.model('User',userSchema);
 
@@ -25,13 +25,13 @@ const exerciseSchema = new Schema({
   userid: { type: String, required: true},
   description: { type:String, required: true},
   duration: { type:Number, required: true},
-  date: { type: Date, required: true}
-})
+  date: { type: Date, required: true},
+}, {versionKey:false})
 
 let Exercise = mongoose.model('Exercise', exerciseSchema)
 
 app.use(function(req, res, next) {
-  console.log(req.method + " " + req.path + " - " + req.ip);
+  console.log(req);
   next();
 });
 
