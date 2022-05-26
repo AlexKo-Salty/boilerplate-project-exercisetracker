@@ -78,7 +78,7 @@ app.post('/api/users/:_id/exercises',function(req, res) {
           username: username,
           description: data.description,
           duration: data.duration,
-          date: data.date,
+          date: data.date.toDateString(),
           _id: data.userid
         });
       })
@@ -88,6 +88,59 @@ app.post('/api/users/:_id/exercises',function(req, res) {
       res.json({Error: "Invaild user id."});
     }
   })  
+})
+
+//Build log list
+app.get('/api/users/:_id/logs', function(req, res) {
+  //Get the parameters
+  let from = req.query.from;
+  let to = req.query.to;
+  let limit = req.query.limit;
+
+  //Get user info first
+  User.findById(req.params["_id"], function (err, data) {
+    if (err) return console.log(err);
+    if (data)
+    {
+      //
+      let username = data.username;
+      let userid = data._id;
+      //Check if date string is exist, if yes, convert to date, if not, apply current date
+      let query = {
+        userid: userid
+      };
+
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      if (from && from.match(regex) !== null && to && to.match(regex) !== null)
+      {
+        query.date = { $gte: from, $lte: to}
+      } else if (from && from.match(regex) !== null && (!to || to.match(regex) === null))
+      {
+        query.date = { $gte: from }
+      } else if (to && to.match(regex) !== null && (!from || from.match(regex) === null))
+      {
+        query.date = { $lte: to }
+      }
+
+      Exercise.find(query)
+        .limit( (limit && !isNaN(limit) ? limit : 0))
+        .select({userid: 0})
+        .exec(function(err, data)
+        {
+          if (err) return console.error(err);
+          res.json({
+            username: username,
+            count: data.length ? data.length : 0,
+            _id: userid,
+            log: data
+          })
+        });
+    }
+    else
+    {
+      res.json({Error: "Invaild user id."});
+    }
+  })
 })
 
 app.use(cors())
